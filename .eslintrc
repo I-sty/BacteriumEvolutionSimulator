@@ -1,4 +1,3 @@
-
 {
     "rules": {
         "indent": [
@@ -19,6 +18,9 @@
         "browser": true,
         "node": true,
         "mocha": true
+    },
+    "parserOptions": {
+        "sourceType": "module"
     },
     "extends": "eslint:recommended"
 }
