@@ -5,14 +5,28 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>ES6 Boilerplate</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="src/style/style.css">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 </head>
 
 <body>
-    <!-- <select id="selector"></select> -->
-    <span id="iterations"></span>
-    <button id="buttonStop">PAUSE</button>
-    <svg width="1000" id="canvas" height="1000"> </svg>
-    <script type="text/javascript" src="dist/bundle.js"></script>
+    <div class="container-fluid">
+        <!-- <select id="selector"></select> -->
+        <div class="header" style="margin-bottom: 20px;">
+            <h2>Bacterium Evolution Simulator</h2>
+            <span class="badge badge-info" style="font-size: 20px; padding: 0.3em .6em;" id="iterations"></span>
+            <button id="buttonStop" type="button" class="btn">PAUSE</button>
+        </div>
+        <div style="text-align:center">
+            <svg width="1000" id="canvas" height="1000" class="bg-primary"> </svg>
+        </div>
+        <script type="text/javascript" src="dist/bundle.js"></script>
+    </div>
 </body>
 
 </html>

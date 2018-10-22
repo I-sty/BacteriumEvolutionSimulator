@@ -1,0 +1,32 @@
+.line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 2px;
+}
+
+.grid line {
+    stroke: lightgrey;
+    stroke-opacity: 0.2;
+    shape-rendering: crispEdges;
+}
+
+.grid path {
+    stroke-width: 0;
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    width: 65px;
+    height: 22px;
+    padding: 3px;
+    font: 12px monospace;
+    background: lightsteelblue;
+    border: 1px solid #444;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+.control.glyphicon {
+    position: static;
+}
