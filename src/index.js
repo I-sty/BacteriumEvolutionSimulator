@@ -5,16 +5,17 @@ import { createGridlines } from "./view/gridLayout";
 import {
     createBacteriums,
     doIterations,
-    toggleMoving
+    toggleMoving,
+    initBacteriumManager
 } from "./controller/bacteriumManager";
 
 /**
  * Main entry point
  */
 createGridlines(d3.select("#canvas"));
+initBacteriumManager();
 createBacteriums();
 doIterations(0);
-
 
 document
     .getElementById("buttonStop")

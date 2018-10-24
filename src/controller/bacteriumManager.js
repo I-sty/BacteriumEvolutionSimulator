@@ -2,13 +2,14 @@ import * as d3 from "d3";
 import Bacterium from "../data/bacterium";
 import { NUMBER_OF_ROWS, NUMBER_OF_COLOUMNS } from "../view/gridLayout";
 import Food from "../data/food";
+import FieldManager from "./fieldManager";
 
 ("use strict");
 
 const ITERATIONS = 200;
-const NUMBER_OF_BACTERIUMS = 35;
+const NUMBER_OF_BACTERIUMS = 5;
 const CIRCLE_RADIUS = 7;
-const SLEEP_BETWEEN_ITERATIONS = 350;
+const SLEEP_BETWEEN_ITERATIONS = 500;
 const NUMBER_OF_FOOD_IN_ITERATIONS = 10;
 
 var scaleEnergy = d3
@@ -25,6 +26,7 @@ var triangle = d3
     .symbol()
     .type(d3.symbolTriangle)
     .size(30);
+var fieldManager;
 
 /**
  * Create the bacteriums in the gui
@@ -32,11 +34,16 @@ var triangle = d3
 export function createBacteriums() {
     var bacteriumsData = new Array(NUMBER_OF_BACTERIUMS);
     for (let i = 0; i < bacteriumsData.length; ++i) {
-        let x = scaleHorizontally(toFixed(Math.random() * NUMBER_OF_ROWS, 0));
-        let y = scaleVertically(toFixed(Math.random() * NUMBER_OF_COLOUMNS, 0));
+        let xData = toFixed(Math.random() * NUMBER_OF_ROWS, 0);
+        let yData = toFixed(Math.random() * NUMBER_OF_COLOUMNS, 0);
+        let xGUI = scaleHorizontally(xData);
+        let yGUI = scaleVertically(yData);
         let energy = scaleEnergy(Math.random());
-        bacteriumsData[i] = new Bacterium(x, y, energy);
+        bacteriumsData[i] = new Bacterium(xGUI, yGUI, energy, xData, yData);
     }
+
+    // Add bacteriums to the Field Manager
+    fieldManager.addNewBacteriums(bacteriumsData);
 
     // Define the div for the tooltip
     var div = d3
@@ -53,7 +60,7 @@ export function createBacteriums() {
         .append("g")
         .attr("class", "bacteriums")
         .attr("transform", d => {
-            return "translate(" + d.x + "," + d.y + ")";
+            return "translate(" + d.xAxisPosition + "," + d.yAxisPosition + ")";
         })
         .on("mouseover", d => {
             div.transition()
@@ -116,45 +123,61 @@ async function moveBacteriums() {
     bacteriums
         .transition()
         .attr("transform", d => {
+            var oldX = d.xBackendPosition;
+            var oldY = d.yBackendPosition;
             switch (DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)]) {
                 case "N":
                     // north
-                    d.y += 20;
+                    d.yAxisPosition += 20;
+                    d.yBackendPosition += 1;
                     break;
                 case "S":
                     // south
-                    d.y -= 20;
+                    d.yAxisPosition -= 20;
+                    d.yBackendPosition -= 1;
                     break;
                 case "E":
                     // east
-                    d.x += scaleHorizontally(1) - 10;
+                    d.xAxisPosition += scaleHorizontally(1) - 10;
+                    d.xBackendPosition += 1;
                     break;
                 case "W":
                     // west
-                    d.x -= scaleHorizontally(1) - 10;
+                    d.xAxisPosition -= scaleHorizontally(1) - 10;
+                    d.xBackendPosition += 1;
                     break;
                 case "NE":
                     // north-east
-                    d.x += scaleHorizontally(1) - 10;
-                    d.y += 20;
+                    d.xAxisPosition += scaleHorizontally(1) - 10;
+                    d.yAxisPosition += 20;
+                    d.xBackendPosition += 1;
+                    d.yBackendPosition += 1;
                     break;
                 case "SE":
                     // south-east
-                    d.x -= scaleHorizontally(1) - 10;
-                    d.y += 20;
+                    d.xAxisPosition += scaleHorizontally(1) - 10;
+                    d.yAxisPosition -= 20;
+                    d.xBackendPosition += 1;
+                    d.yBackendPosition -= 1;
                     break;
                 case "SW":
                     // south-west
-                    d.x -= scaleHorizontally(1) - 10;
-                    d.y -= 20;
+                    d.xAxisPosition -= scaleHorizontally(1) - 10;
+                    d.yAxisPosition -= 20;
+                    d.xBackendPosition -= 1;
+                    d.yBackendPosition -= 1;
                     break;
                 case "NW":
                     // north-west
-                    d.x -= scaleHorizontally(1) - 10;
-                    d.y += 20;
+                    d.xAxisPosition -= scaleHorizontally(1) - 10;
+                    d.yAxisPosition += 20;
+                    d.xBackendPosition -= 1;
+                    d.yBackendPosition += 1;
                     break;
             }
             d.energy -= Math.random();
+            d.age += 1;
+            fieldManager.moveBacterium(oldX, oldY, d.xBackendPosition, d.yBackendPosition, d.id);
             return "translate(" + d.x + "," + d.y + ")";
         })
         .attr("opacity", d => {
@@ -170,11 +193,17 @@ async function moveBacteriums() {
 async function addFood() {
     var foodArray = new Array(NUMBER_OF_FOOD_IN_ITERATIONS);
     for (var i = 0; i < NUMBER_OF_FOOD_IN_ITERATIONS; ++i) {
-        let x = scaleHorizontally(toFixed(Math.random() * NUMBER_OF_ROWS, 0));
-        let y = scaleVertically(toFixed(Math.random() * NUMBER_OF_COLOUMNS, 0));
+        let xData = toFixed(Math.random() * NUMBER_OF_ROWS, 0);
+        let yData = toFixed(Math.random() * NUMBER_OF_COLOUMNS, 0);
+        let x = scaleHorizontally(xData);
+        let y = scaleVertically(yData);
         let energy = scaleEnergy(Math.random());
-        foodArray[i] = new Food(x, y, energy);
+        foodArray[i] = new Food(x, y, energy, xData, yData);
     }
+
+    // Add foods to the Field Manager
+    fieldManager.addFood(foodArray);
+
     foods = d3
         .select("svg")
         .selectAll("g.foods")
@@ -183,7 +212,7 @@ async function addFood() {
         .append("g")
         .attr("class", "foods")
         .attr("transform", d => {
-            return "translate(" + d.x + "," + d.y + ")";
+            return "translate(" + d.xAxisPosition + "," + d.yAxisPosition + ")";
         })
         .on("mouseover", d => {
             div.transition()
@@ -222,8 +251,7 @@ async function addFood() {
 
 export function toggleMoving() {
     STOP = !STOP;
-    document.getElementById("buttonStop").innerHTML =
-        STOP == true ? "CONTINUE" : "PAUSE";
+    document.getElementById("buttonStop").innerHTML = STOP == true ? "CONTINUE" : "PAUSE";
     if (STOP == true) {
         //stopMoving();
     } else {
@@ -231,15 +259,15 @@ export function toggleMoving() {
     }
 }
 
+export function initBacteriumManager() {
+    fieldManager = new FieldManager(NUMBER_OF_ROWS, NUMBER_OF_COLOUMNS);
+}
+
 /**
  * Moves the bacteriums in the area.
  */
 export async function doIterations(iteration) {
-    for (
-        numberOfIteration = iteration;
-        numberOfIteration <= ITERATIONS && !STOP;
-        ++numberOfIteration
-    ) {
+    for (numberOfIteration = iteration; numberOfIteration <= ITERATIONS && !STOP; ++numberOfIteration) {
         moveBacteriums();
         addFood();
         var items = d3.selectAll("g");
